@@ -351,7 +351,7 @@ class HBaseConnectorITCase extends HBaseTestBase {
                         + " 'table-name' = '"
                         + TEST_TABLE_6
                         + "',"
-                        + " 'dynamic.table' = 'true',"
+                        + " 'dynamic-table' = 'true',"
                         + " 'zookeeper.quorum' = '"
                         + getZookeeperQuorum()
                         + "'"

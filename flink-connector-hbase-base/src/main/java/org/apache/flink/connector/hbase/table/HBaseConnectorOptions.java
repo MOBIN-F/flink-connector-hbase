@@ -61,7 +61,7 @@ public class HBaseConnectorOptions {
                                     + "sink encodes/decodes empty bytes as null values for all types except string type.");
 
     public static final ConfigOption<Boolean> DYNAMIC_TABLE =
-            ConfigOptions.key("dynamic.table")
+            ConfigOptions.key("dynamic-table")
                     .booleanType()
                     .defaultValue(false)
                     .withDescription("Whether to use dynamic table.");
