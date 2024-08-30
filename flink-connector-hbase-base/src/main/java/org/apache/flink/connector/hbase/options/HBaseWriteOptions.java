@@ -37,6 +37,7 @@ public class HBaseWriteOptions implements Serializable {
     private final boolean ignoreNullValue;
     private final Integer parallelism;
     private final boolean dynamicTable;
+    private final String sinkMode;
 
     private HBaseWriteOptions(
             long bufferFlushMaxSizeInBytes,
@@ -44,13 +45,15 @@ public class HBaseWriteOptions implements Serializable {
             long bufferFlushIntervalMillis,
             boolean ignoreNullValue,
             Integer parallelism,
-            boolean dynamicTable) {
+            boolean dynamicTable,
+            String sinkMode) {
         this.bufferFlushMaxSizeInBytes = bufferFlushMaxSizeInBytes;
         this.bufferFlushMaxRows = bufferFlushMaxMutations;
         this.bufferFlushIntervalMillis = bufferFlushIntervalMillis;
         this.ignoreNullValue = ignoreNullValue;
         this.parallelism = parallelism;
         this.dynamicTable = dynamicTable;
+        this.sinkMode = sinkMode;
     }
 
     public long getBufferFlushMaxSizeInBytes() {
@@ -71,6 +74,10 @@ public class HBaseWriteOptions implements Serializable {
 
     public Integer getParallelism() {
         return parallelism;
+    }
+
+    public String getSinkMode() {
+        return sinkMode;
     }
 
     public boolean isDynamicTable() {
@@ -134,6 +141,7 @@ public class HBaseWriteOptions implements Serializable {
         private boolean ignoreNullValue;
         private Integer parallelism;
         private boolean dynamicTable;
+        private String sinkMode;
 
         /**
          * Optional. Sets when to flush a buffered request based on the memory size of rows
@@ -186,6 +194,12 @@ public class HBaseWriteOptions implements Serializable {
             return this;
         }
 
+        /** Optional. Sets whether to use dynamic table. Defaults to not set. */
+        public Builder setSinkMode(String sinkMode) {
+            this.sinkMode = sinkMode;
+            return this;
+        }
+
         /** Creates a new instance of {@link HBaseWriteOptions}. */
         public HBaseWriteOptions build() {
             return new HBaseWriteOptions(
@@ -194,7 +208,8 @@ public class HBaseWriteOptions implements Serializable {
                     bufferFlushIntervalMillis,
                     ignoreNullValue,
                     parallelism,
-                    dynamicTable);
+                    dynamicTable,
+                    sinkMode);
         }
     }
 }

@@ -30,6 +30,7 @@ import org.apache.flink.table.types.logical.LogicalTypeFamily;
 
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -183,6 +184,47 @@ public class HBaseSerde {
             }
         }
         return put;
+    }
+
+    public @Nullable Increment createIncrementMutation(
+            RowData row, long timestamp, @Nullable Long timeToLive, boolean incr) {
+        checkArgument(keyEncoder != null, "row key is not set.");
+        byte[] rowkey = keyEncoder.encode(row, rowkeyIndex);
+        if (rowkey.length == 0) {
+            // drop dirty records, rowkey shouldn't be zero length
+            return null;
+        }
+        // incr
+        Increment increment = new Increment(rowkey);
+        if (timeToLive != null) {
+            increment.setTTL(timeToLive);
+        }
+        for (int i = 0; i < fieldLength; i++) {
+            if (i != rowkeyIndex) {
+                int f = i > rowkeyIndex ? i - 1 : i;
+                // get family key
+                byte[] familyKey = families[f];
+                RowData familyRow = row.getRow(i, qualifiers[f].length);
+                for (int q = 0; q < this.qualifiers[f].length; q++) {
+                    // ignore null value or not
+                    if (writeIgnoreNullValue && familyRow.isNullAt(q)) {
+                        continue;
+                    }
+
+                    // get quantifier key
+                    byte[] qualifier = qualifiers[f][q];
+                    // serialize value
+                    byte[] value = qualifierEncoders[f][q].encode(familyRow, q);
+                    long incrValue = Bytes.toLong(value);
+                    if (incr) {
+                        increment.addColumn(familyKey, qualifier, incrValue);
+                    } else {
+                        increment.addColumn(familyKey, qualifier, -incrValue);
+                    }
+                }
+            }
+        }
+        return increment;
     }
 
     /**

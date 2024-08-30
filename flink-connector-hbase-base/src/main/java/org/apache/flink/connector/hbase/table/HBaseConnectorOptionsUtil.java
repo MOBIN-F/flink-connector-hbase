@@ -36,6 +36,7 @@ import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.SINK_
 import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.SINK_BUFFER_FLUSH_MAX_ROWS;
 import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.SINK_BUFFER_FLUSH_MAX_SIZE;
 import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.SINK_IGNORE_NULL_VALUE;
+import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.SINK_MODE;
 import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.SINK_PARALLELISM;
 import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.ZOOKEEPER_QUORUM;
 import static org.apache.flink.connector.hbase.table.HBaseConnectorOptions.ZOOKEEPER_ZNODE_PARENT;
@@ -94,6 +95,7 @@ public class HBaseConnectorOptionsUtil {
         builder.setIgnoreNullValue(tableOptions.get(SINK_IGNORE_NULL_VALUE));
         builder.setParallelism(tableOptions.getOptional(SINK_PARALLELISM).orElse(null));
         builder.setDynamicTable(tableOptions.get(DYNAMIC_TABLE));
+        builder.setSinkMode(tableOptions.get(SINK_MODE));
         return builder.build();
     }
 

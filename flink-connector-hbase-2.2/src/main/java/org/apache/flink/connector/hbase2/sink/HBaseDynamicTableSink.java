@@ -80,7 +80,8 @@ public class HBaseDynamicTableSink implements DynamicTableSink, SupportsWritingM
                                 metadataKeys,
                                 nullStringLiteral,
                                 writeOptions.isIgnoreNullValue(),
-                                writeOptions.isDynamicTable()),
+                                writeOptions.isDynamicTable(),
+                                writeOptions.getSinkMode()),
                         writeOptions.getBufferFlushMaxSizeInBytes(),
                         writeOptions.getBufferFlushMaxRows(),
                         writeOptions.getBufferFlushIntervalMillis());
@@ -92,8 +93,12 @@ public class HBaseDynamicTableSink implements DynamicTableSink, SupportsWritingM
         // UPSERT mode
         ChangelogMode.Builder builder = ChangelogMode.newBuilder();
         for (RowKind kind : requestedMode.getContainedKinds()) {
-            if (kind != RowKind.UPDATE_BEFORE) {
+            if ("incr".equals(writeOptions.getSinkMode())) {
                 builder.addContainedKind(kind);
+            } else {
+                if (kind != RowKind.UPDATE_BEFORE) {
+                    builder.addContainedKind(kind);
+                }
             }
         }
         return builder.build();

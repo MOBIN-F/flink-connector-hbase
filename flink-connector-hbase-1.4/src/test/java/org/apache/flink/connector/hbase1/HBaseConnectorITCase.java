@@ -729,7 +729,8 @@ class HBaseConnectorITCase extends HBaseTestBase {
                                 Collections.emptyList(),
                                 "null",
                                 false,
-                                false),
+                                false,
+                                null),
                         2 * 1024 * 1024,
                         1000,
                         1000);

@@ -132,6 +132,12 @@ public class HBaseConnectorOptions {
                     .defaultValue(3)
                     .withDescription("the max retry times if lookup database failed.");
 
+    public static final ConfigOption<String> SINK_MODE =
+            ConfigOptions.key("sink.mode")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("sink.mode");
+
     public static final ConfigOption<Integer> SINK_PARALLELISM = FactoryUtil.SINK_PARALLELISM;
 
     private HBaseConnectorOptions() {}

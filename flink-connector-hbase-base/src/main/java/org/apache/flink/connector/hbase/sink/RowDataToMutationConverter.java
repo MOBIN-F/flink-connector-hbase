@@ -44,6 +44,7 @@ public class RowDataToMutationConverter implements HBaseMutationConverter<RowDat
     private final TimeToLiveMetadata timeToLiveMetadata;
     private transient HBaseSerde serde;
     private final boolean dynamicTable;
+    private final String sinkMode;
 
     public RowDataToMutationConverter(
             HBaseTableSchema schema,
@@ -51,13 +52,15 @@ public class RowDataToMutationConverter implements HBaseMutationConverter<RowDat
             List<String> metadataKeys,
             String nullStringLiteral,
             boolean ignoreNullValue,
-            boolean dynamicTable) {
+            boolean dynamicTable,
+            String sinkMode) {
         this.schema = schema;
         this.nullStringLiteral = nullStringLiteral;
         this.ignoreNullValue = ignoreNullValue;
         this.timestampMetadata = new TimestampMetadata(metadataKeys, physicalDataType);
         this.timeToLiveMetadata = new TimeToLiveMetadata(metadataKeys, physicalDataType);
         this.dynamicTable = dynamicTable;
+        this.sinkMode = sinkMode;
     }
 
     @Override
@@ -70,14 +73,23 @@ public class RowDataToMutationConverter implements HBaseMutationConverter<RowDat
         Long timestamp = timestampMetadata.read(record);
         Long timeToLive = timeToLiveMetadata.read(record);
         RowKind kind = record.getRowKind();
-        if (kind == RowKind.INSERT || kind == RowKind.UPDATE_AFTER) {
-            return dynamicTable
-                    ? serde.createDynamicColumnPutMutation(record, timestamp, timeToLive)
-                    : serde.createPutMutation(record, timestamp, timeToLive);
+
+        if ("incr".equals(sinkMode)) {
+            if (kind == RowKind.INSERT || kind == RowKind.UPDATE_AFTER) {
+                return serde.createIncrementMutation(record, timestamp, timeToLive, true);
+            } else {
+                return serde.createIncrementMutation(record, timestamp, timeToLive, false);
+            }
         } else {
-            return dynamicTable
-                    ? serde.createDynamicColumnDeleteMutation(record, timestamp)
-                    : serde.createDeleteMutation(record, timestamp);
+            if (kind == RowKind.INSERT || kind == RowKind.UPDATE_AFTER) {
+                return dynamicTable
+                        ? serde.createDynamicColumnPutMutation(record, timestamp, timeToLive)
+                        : serde.createPutMutation(record, timestamp, timeToLive);
+            } else {
+                return dynamicTable
+                        ? serde.createDynamicColumnDeleteMutation(record, timestamp)
+                        : serde.createDeleteMutation(record, timestamp);
+            }
         }
     }
 }
