@@ -20,7 +20,21 @@
 # between several workflows with the same names while preparing a report for GHA usage
 # https://infra-reports.apache.org/#ghactions
 name: Flink Connector HBase CI
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+      - CI-*
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+  pull_request:
+    branches:
+      - master
+      - CI-*
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
